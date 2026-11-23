@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#ffe3f0">
+  <title>Bloble</title>
+  <meta name="description" content="Bloble – a tiny, wholesome blob friend that grows a little every day.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M8 52C4 30 16 10 32 10s28 20 24 42c-1 4-6 6-24 6S9 56 8 52z' fill='%23ffb3d1' stroke='%235b4a6b' stroke-width='3'/%3E%3Cellipse cx='23' cy='32' rx='5' ry='6.5' fill='%233d2f4f'/%3E%3Cellipse cx='41' cy='32' rx='5' ry='6.5' fill='%233d2f4f'/%3E%3Ccircle cx='21.5' cy='29.5' r='2' fill='%23fff'/%3E%3Ccircle cx='39.5' cy='29.5' r='2' fill='%23fff'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Pixelify+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app" class="tod-day">
+    <header class="top">
+      <h1 class="logo" aria-label="Bloble">
+        <svg viewBox="0 0 320 96" class="logo-svg" aria-hidden="true">
+          <defs>
+            <filter id="fluff" x="-15%" y="-40%" width="130%" height="180%">
+              <feMorphology in="SourceAlpha" operator="dilate" radius="7" result="fat"/>
+              <feTurbulence type="fractalNoise" baseFrequency="0.11" numOctaves="2" seed="7" result="noise"/>
+              <feDisplacementMap in="fat" in2="noise" scale="11" xChannelSelector="R" yChannelSelector="G" result="fuzzy"/>
+              <feFlood flood-color="#ffffff"/>
+              <feComposite in2="fuzzy" operator="in" result="cloud"/>
+              <feOffset in="fuzzy" dy="5" result="drop"/>
+              <feFlood flood-color="#f7a8cb"/>
+              <feComposite in2="drop" operator="in" result="shadow"/>
+              <feMerge>
+                <feMergeNode in="shadow"/>
+                <feMergeNode in="cloud"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+            <linearGradient id="logoGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#ff9fcb"/>
+              <stop offset="1" stop-color="#b48cff"/>
+            </linearGradient>
+          </defs>
+          <text x="160" y="66" text-anchor="middle" class="logo-text" fill="url(#logoGrad)" filter="url(#fluff)">Bloble</text>
+          <g class="logo-sparkles" fill="#ffd36e">
+            <path d="M22 20l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/>
+            <path d="M298 62l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/>
+          </g>
+        </svg>
+      </h1>
+      <div class="top-right">
+        <div class="coins" title="Blob coins"><span class="coin-ico"></span><span id="coinCount">0</span></div>
+        <button id="musicBtn" class="icon-btn" aria-label="Toggle music" title="Music">♪</button>
+      </div>
+    </header>
+
+    <section class="stats" aria-label="Needs">
+      <div class="stat" data-stat="hunger" title="Tummy"><span class="ico">🍓</span><div class="bar"><i></i></div></div>
+      <div class="stat" data-stat="fun" title="Fun"><span class="ico">🎈</span><div class="bar"><i></i></div></div>
+      <div class="stat" data-stat="clean" title="Fresh"><span class="ico">🫧</span><div class="bar"><i></i></div></div>
+      <div class="stat" data-stat="energy" title="Energy"><span class="ico">⭐</span><div class="bar"><i></i></div></div>
+    </section>
+
+    <main class="stage" id="stage">
+      <div class="wall"></div>
+      <div class="window">
+        <div class="sky">
+          <div class="sun"></div>
+          <div class="cloud c1"></div>
+          <div class="cloud c2"></div>
+          <div class="stars-sky"></div>
+        </div>
+        <div class="window-cross"></div>
+      </div>
+      <div class="frame-pic"><span>♡</span></div>
+      <div class="plant"><span class="leaf l1"></span><span class="leaf l2"></span><span class="leaf l3"></span><span class="pot"></span></div>
+      <div class="floor"></div>
+      <div class="rug"></div>
+      <div id="blobWrap"><svg id="blobSvg" viewBox="-170 -270 340 290" aria-label="Your blob"></svg></div>
+      <div class="speech" id="speech"></div>
+      <div id="particles"></div>
+      <div id="nightOverlay"></div>
+      <div class="nametag" id="nametag" title="Rename">
+        <span id="nameLabel">…</span>
+        <small id="ageLabel"></small>
+      </div>
+      <div class="hint" id="hint"></div>
+      <button class="bath-done" id="bathDone">Done ✓</button>
+    </main>
+
+    <nav class="actions" aria-label="Actions">
+      <button class="act" data-act="feed"><span class="e">🍙</span><span>Feed</span></button>
+      <button class="act" data-act="bath"><span class="e">🧽</span><span>Bath</span></button>
+      <button class="act" data-act="play"><span class="e">🎮</span><span>Play</span></button>
+      <button class="act" data-act="sleep"><span class="e">🌙</span><span id="sleepLabel">Sleep</span></button>
+      <button class="act" data-act="gift"><span class="e">🎁</span><span>Gifts</span><i class="badge" id="giftBadge"></i></button>
+      <button class="act" data-act="dex"><span class="e">🎩</span><span>Hatdex</span></button>
+    </nav>
+    <p class="footer-note">Pet your blob by stroking it ♡</p>
+  </div>
+
+  <!-- Naming -->
+  <div class="modal" id="nameModal">
+    <div class="sheet">
+      <div class="egg-wrap"><div class="egg"></div></div>
+      <h2 id="nameTitle">A little blob appeared!</h2>
+      <p class="sub" id="nameSub">It's looking at you with big curious eyes. What will you call it?</p>
+      <input id="nameInput" maxlength="14" placeholder="Mochi" autocomplete="off" spellcheck="false">
+      <div class="color-pick" id="colorPick"></div>
+      <button class="btn primary" id="nameOk">That's you! ♡</button>
+    </div>
+  </div>
+
+  <!-- Feed -->
+  <div class="modal" id="feedModal">
+    <div class="sheet">
+      <h2>Snack time</h2>
+      <div class="food-grid" id="foodGrid"></div>
+      <button class="btn ghost" data-close>Not now</button>
+    </div>
+  </div>
+
+  <!-- Play menu -->
+  <div class="modal" id="playModal">
+    <div class="sheet">
+      <h2>Let's play!</h2>
+      <div class="game-list" id="gameList"></div>
+      <button class="btn ghost" data-close>Maybe later</button>
+    </div>
+  </div>
+
+  <!-- Game -->
+  <div class="modal" id="gameModal">
+    <div class="sheet game-sheet">
+      <div class="game-head"><span id="gameTitle"></span><span id="gameScore">0</span><span id="gameTime"></span><button class="quit" id="gameQuit" aria-label="Leave game">✕</button></div>
+      <div class="game-area" id="gameArea"></div>
+    </div>
+  </div>
+
+  <!-- Lootbox -->
+  <div class="modal" id="boxModal">
+    <div class="sheet">
+      <h2 id="boxTitle">Gift box</h2>
+      <div class="box-stage" id="boxStage">
+        <div class="rays"></div>
+        <div class="giftbox" id="giftbox"><div class="lid"></div><div class="box"></div></div>
+        <div class="reveal" id="reveal"></div>
+      </div>
+      <p class="sub" id="boxInfo"></p>
+      <div class="row">
+        <button class="btn primary" id="boxOpen">Open</button>
+        <button class="btn" id="boxWear" hidden>Wear it!</button>
+      </div>
+      <button class="btn ghost" data-close>Close</button>
+    </div>
+  </div>
+
+  <!-- Hatdex -->
+  <div class="modal" id="dexModal">
+    <div class="sheet">
+      <h2>Hatdex <small id="dexCount"></small></h2>
+      <div class="dex-grid" id="dexGrid"></div>
+      <button class="btn ghost" data-close>Close</button>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script src="js/state.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/hats.js"></script>
+  <script src="js/blob.js"></script>
+  <script src="js/games.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
