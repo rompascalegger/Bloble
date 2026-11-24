@@ -11,6 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Pixelify+Sans:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/extras.css">
 </head>
 <body>
   <div id="app" class="tod-day">
@@ -58,7 +59,16 @@
       <div class="stat" data-stat="energy" title="Energy"><span class="ico">⭐</span><div class="bar"><i></i></div></div>
     </section>
 
+    <section class="status">
+      <button class="lvl" id="lvlBtn" title="Friendship level"><span class="lvl-heart">♥<b id="lvlNum">1</b></span><span class="xpbar"><i id="xpFill"></i></span></button>
+      <button class="pill" id="streakBtn" title="Daily streak">🔥<b id="streakNum">0</b></button>
+      <button class="pill" id="questBtn" title="Daily quests">📋<i class="badge" id="questBadge"></i></button>
+      <button class="pill" id="stickerBtn" title="Sticker book">🏅<i class="badge" id="stickerBadge"></i></button>
+      <button class="pill" id="trickBtn" title="Tricks">🪄<i class="badge" id="trickBadge"></i></button>
+    </section>
+
     <main class="stage" id="stage">
+      <div id="aura"></div>
       <div class="wall"></div>
       <div class="window">
         <div class="sky">
@@ -76,6 +86,10 @@
       <div id="blobWrap"><svg id="blobSvg" viewBox="-170 -270 340 290" aria-label="Your blob"></svg></div>
       <div class="speech" id="speech"></div>
       <div id="particles"></div>
+      <div id="visitors"></div>
+      <div class="love-meter" id="loveMeter"><span class="lm-heart">♥</span><div class="lm-track"><i id="loveFill"></i></div></div>
+      <div class="fever-tag" id="feverTag">✨ Sparkle Fever ×2</div>
+      <div id="flash"></div>
       <div id="nightOverlay"></div>
       <div class="nametag" id="nametag" title="Rename">
         <span id="nameLabel">…</span>
@@ -161,6 +175,59 @@
     </div>
   </div>
 
+  <!-- Quests -->
+  <div class="modal" id="questModal">
+    <div class="sheet">
+      <h2>Daily quests</h2>
+      <p class="sub">Little things to do together today ♡</p>
+      <div class="quest-list" id="questList"></div>
+      <button class="btn ghost" data-close>Close</button>
+    </div>
+  </div>
+
+  <!-- Stickers -->
+  <div class="modal" id="stickerModal">
+    <div class="sheet">
+      <h2>Sticker book <small id="stickerCount"></small></h2>
+      <div class="sticker-grid" id="stickerGrid"></div>
+      <button class="btn ghost" data-close>Close</button>
+    </div>
+  </div>
+
+  <!-- Tricks -->
+  <div class="modal" id="trickModal">
+    <div class="sheet">
+      <h2>Tricks</h2>
+      <p class="sub">Practice together! Every try makes your blob a little better.</p>
+      <div class="trick-list" id="trickList"></div>
+      <button class="btn ghost" data-close>Close</button>
+    </div>
+  </div>
+
+  <!-- Streak -->
+  <div class="modal" id="streakModal">
+    <div class="sheet">
+      <div class="big-emoji">🔥</div>
+      <h2 id="streakTitle">Day 1 streak!</h2>
+      <p class="sub" id="streakSub"></p>
+      <div class="streak-track" id="streakTrack"></div>
+      <button class="btn primary" id="streakClaim">Claim!</button>
+    </div>
+  </div>
+
+  <!-- Level up -->
+  <div class="modal" id="levelModal">
+    <div class="sheet level-sheet">
+      <div class="level-burst"><span id="levelBig">2</span></div>
+      <h2>Friendship level up!</h2>
+      <p class="sub" id="levelSub"></p>
+      <button class="btn primary" data-close>Yay! ♡</button>
+    </div>
+  </div>
+
+  <canvas id="confetti"></canvas>
+  <div id="flyLayer"></div>
+  <div id="banner"></div>
   <div id="toast"></div>
 
   <script src="js/state.js"></script>
@@ -169,5 +236,7 @@
   <script src="js/blob.js"></script>
   <script src="js/games.js"></script>
   <script src="js/main.js"></script>
+  <script src="js/juice.js"></script>
+  <script src="js/progress.js"></script>
 </body>
 </html>

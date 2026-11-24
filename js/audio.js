@@ -137,6 +137,11 @@ const Sound = (() => {
     surprise() { const t = ctx.currentTime, o = tone(sfxBus, t, 500, 'sine', 0.005, 0.25, 0.15); o.frequency.exponentialRampToValueAtTime(1100, t + 0.1); },
     shake() { const t = ctx.currentTime; noise(sfxBus, t, 0.12, 0.12, 'bandpass', 600); },
     bubble() { const t = ctx.currentTime, o = tone(sfxBus, t, 700 + Math.random() * 600, 'sine', 0.003, 0.1, 0.06); o.frequency.exponentialRampToValueAtTime(1500, t + 0.05); },
+    fanfare() { const t = ctx.currentTime; [[72, 0], [76, 0.1], [79, 0.2], [84, 0.32], [79, 0.48], [84, 0.58]].forEach(([n, d], i) => { tone(sfxBus, t + d, mtof(n), 'square', 0.004, 0.07, i === 5 ? 0.7 : 0.14); tone(sfxBus, t + d, mtof(n - 12), 'triangle', 0.004, 0.12, i === 5 ? 0.7 : 0.14); }); },
+    sparkle() { const t = ctx.currentTime; [88, 91, 96].forEach((n, i) => tone(sfxBus, t + i * 0.05, mtof(n), 'sine', 0.002, 0.08, 0.25)); },
+    tick(p = 1) { tone(sfxBus, ctx.currentTime, 1200 * p, 'square', 0.001, 0.03, 0.03); },
+    whoosh() { noise(sfxBus, ctx.currentTime, 0.35, 0.08, 'bandpass', 900); },
+    oops() { const t = ctx.currentTime, o = tone(sfxBus, t, 600, 'triangle', 0.005, 0.2, 0.3); o.frequency.exponentialRampToValueAtTime(220, t + 0.3); },
     yawn() { const t = ctx.currentTime, o = tone(sfxBus, t, 340, 'triangle', 0.15, 0.14, 0.7); o.frequency.linearRampToValueAtTime(460, t + 0.3); o.frequency.linearRampToValueAtTime(260, t + 0.85); },
   };
 

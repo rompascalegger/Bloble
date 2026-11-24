@@ -132,6 +132,7 @@ class BlobView {
   hop(power = 480) { if (this.y >= -1) { this.vy = -power; this.sqv -= 3; } }
   poke() { this.sqv += 5; this.jiggle = 1; }
   wiggle() { this.wig = 1; }
+  spin(dur = 0.7) { this.spinStart = this.t; this.spinDur = dur; }
 
   renderFace(name) {
     const e = EMOTIONS[name] || EMOTIONS.neutral, c = this.color;
@@ -184,7 +185,7 @@ class BlobView {
     }
     this.sqv += (-320 * this.sq - 13 * this.sqv) * dt;
     this.sq += this.sqv * dt;
-    this.sq = Math.max(-0.35, Math.min(0.35, this.sq));
+    this.sq = Math.max(-0.22, Math.min(0.28, this.sq));
     this.jiggle *= Math.pow(0.12, dt);
     this.wig *= Math.pow(0.08, dt);
     this.scale += (this.targetScale - this.scale) * Math.min(1, dt * 2);
@@ -193,7 +194,11 @@ class BlobView {
     const sx = 1 + this.sq - air, sy = 1 - this.sq + air;
     const s = this.scale;
     this.el.root.setAttribute('transform', `translate(0 ${this.y.toFixed(1)}) scale(${(s * sx).toFixed(3)} ${(s * sy).toFixed(3)})`);
-    const rot = this.wig * 9 * Math.sin(t * 28) + this.gaze.x * 2.5;
+    let rot = this.wig * 9 * Math.sin(t * 28) + this.gaze.x * 2.5;
+    if (this.spinStart != null) {
+      const p = (t - this.spinStart) / this.spinDur;
+      if (p >= 1) this.spinStart = null; else rot += 360 * (1 - Math.pow(1 - p, 3));
+    }
     this.el.tilt.setAttribute('transform', `rotate(${rot.toFixed(2)} 0 -10)`);
     this.el.body.setAttribute('d', this.bodyPath(t));
     const shadowS = 1 / (1 - this.y / 260);

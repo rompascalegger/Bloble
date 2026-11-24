@@ -1,4 +1,9 @@
 /* Bloble – save state, needs, growth */
+const Bus = {
+  h: {},
+  on(e, f) { (this.h[e] || (this.h[e] = [])).push(f); },
+  emit(e, d) { (this.h[e] || []).forEach((f) => { try { f(d); } catch (err) { console.error(err); } }); },
+};
 const Store = (() => {
   const KEY = 'bloble.save.v1';
   const PREF = 'bloble.prefs.v1';

@@ -53,12 +53,12 @@
   function closeModal(id) { $('#' + id).classList.remove('open'); }
   function addCoins(n) {
     if (!n) return;
-    S.coins += n; Sound.play('coin');
+    S.coins += n; Sound.play('coin'); Bus.emit('coins', n);
     const c = $('.coins'); c.classList.remove('bump'); void c.offsetWidth; c.classList.add('bump');
     updateHUD();
   }
   const today = () => dayKey(Date.now());
-  const giftReady = () => S && S.lastGift !== today();
+  const giftReady = () => S && (S.lastGift !== today() || (S.freeBoxes || 0) > 0);
 
   function updateHUD() {
     if (!S) return;
@@ -144,7 +144,7 @@
     phase = 'busy'; updateHUD();
     blob.emote('surprised', 900);
     setTimeout(() => { blob.emote('excited', 2600); Sound.play('yay'); say(`Hi! I'm ${name}!`, 2600); burst('✨', 6); blob.hop(420); }, 900);
-    setTimeout(() => { phase = 'idle'; refreshMood(); toast('🎁 A welcome present is waiting for you!'); updateHUD(); }, 3600);
+    setTimeout(() => { phase = 'idle'; refreshMood(); toast('🎁 A welcome present is waiting for you!'); updateHUD(); Bus.emit('greeted', { born: true }); }, 3600);
   }
 
   // ---------- the visit ----------
@@ -190,6 +190,7 @@
       say('I feel bigger!', 2000);
     } else if (giftReady()) toast('🎁 A daily present is waiting!');
     updateHUD();
+    Bus.emit('greeted', visitInfo);
   }
 
   // ---------- audio ----------
@@ -249,6 +250,7 @@
     spawn('💗', x, y - 10); Sound.play('purr');
     if (petCount % 6 === 0) say(pick(['hehe~ ♡', 'that tickles!', 'more pets pls', '♡ ♡ ♡', 'purrrr…']), 1500);
     if (S.pets % 15 === 0) { addCoins(1); }
+    Bus.emit('pet', { x, y });
     updateHUD();
   }
 
@@ -269,7 +271,7 @@
   function endBath() {
     if (phase !== 'bath') return;
     phase = 'idle'; stage.classList.remove('bathing'); hint(null);
-    if (S.stats.clean > 80) { burst('✨', 8); Sound.play('chime'); say('So fresh! ✨', 2000); blob.emote('excited', 1800); blob.hop(360); }
+    if (S.stats.clean > 80) { burst('✨', 8); Sound.play('chime'); say('So fresh! ✨', 2000); blob.emote('excited', 1800); blob.hop(360); Bus.emit('bath'); }
     save(); updateHUD();
   }
   $('#bathDone').onclick = endBath;
@@ -304,7 +306,7 @@
     setTimeout(() => {
       Life.add(S, 'hunger', f.v); Life.add(S, 'fun', f.fun);
       blob.emote('joy', 1500); blob.hop(300); say(pick(['Yummy!', 'Nom nom ♡', 'Tasty~', `${f.n}! ♡`]), 1700);
-      phase = 'idle'; save(); updateHUD();
+      phase = 'idle'; Bus.emit('feed', f); save(); updateHUD();
     }, 2450);
   }
 
@@ -343,6 +345,7 @@
         closeModal('gameModal'); phase = 'idle';
         S.games++; Life.add(S, 'fun', 20); Life.add(S, 'energy', -8); Life.add(S, 'hunger', -4);
         addCoins(coins); blob.emote('excited', 2200); blob.hop(420);
+        Bus.emit('game', { id: g.id, score, coins });
         say(pick(['That was fun!', 'Again again!', 'You are so good at this!', 'Hehe, I had fun ♡']), 2200);
         save(); updateHUD();
       },
@@ -362,18 +365,19 @@
     ob.textContent = free ? 'Open (free!)' : `Open · ${BOX_COST}`;
     ob.disabled = !free && S.coins < BOX_COST;
     ob.hidden = false;
+    Bus.emit('boxRefresh');
   }
   let lastWon = null;
   function openBox() {
     const free = giftReady();
     if (!free && S.coins < BOX_COST) return;
-    if (free) S.lastGift = today(); else { S.coins -= BOX_COST; }
+    if (free) { if (S.lastGift !== today()) S.lastGift = today(); else S.freeBoxes--; } else { S.coins -= BOX_COST; }
     updateHUD(); save();
     const ob = $('#boxOpen'); ob.hidden = true;
     $('#boxStage').classList.remove('opened');
     const gb = $('#giftbox'); gb.classList.remove('shake'); void gb.offsetWidth; gb.classList.add('shake');
     [0, 450, 900].forEach((d) => setTimeout(() => Sound.play('shake'), d));
-    const h = rollHat(); lastWon = h;
+    const h = rollHat(); lastWon = h; Bus.emit('boxRoll', h);
     setTimeout(() => {
       const dup = !!S.hats[h.id];
       S.hats[h.id] = (S.hats[h.id] || 0) + 1;
@@ -382,6 +386,7 @@
       Sound.play(h.rarity === 'legendary' || h.rarity === 'epic' ? 'yay' : 'chime');
       $('#boxInfo').innerHTML = dup ? 'You already had this one, so it turned into <b>+8 coins</b>!' : 'New hat added to your Hatdex! ♡';
       if (dup) addCoins(8);
+      Bus.emit('box', { hat: h, dup });
       $('#boxWear').hidden = false;
       ob.hidden = false;
       const free2 = giftReady();
@@ -398,7 +403,7 @@
     blob.setHat(S.equipped ? hatById(S.equipped) : null);
     blob.emote(S.equipped ? 'excited' : 'happy', 1600); blob.hop(340); Sound.play('boop', 1.3);
     say(S.equipped ? pick(['Do I look cute?', 'Fancy! ♡', 'I love it!']) : 'Hat off~', 1700);
-    save();
+    Bus.emit('hat', S.equipped); save();
   }
   function buildDex() {
     const g = $('#dexGrid'); g.innerHTML = '';
@@ -487,6 +492,10 @@
   setTimeOfDay(); setInterval(setTimeOfDay, 60000);
   window.addEventListener('pagehide', save);
   document.addEventListener('visibilitychange', () => { if (document.hidden) save(); });
+  window.Bloble = {
+    get S() { return S; }, get phase() { return phase; }, set phase(p) { phase = p; },
+    blob, stage, say, burst, spawn, toast, addCoins, save, updateHUD, openModal, closeModal, pick, refreshMood,
+  };
   if (S) beginVisit();
   else { blob.setScale(0.62, true); blob.setBase('peek'); startNaming(false); }
   requestAnimationFrame(loop);
